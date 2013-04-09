@@ -55,7 +55,8 @@
     <p>It is recommended that user defined applications should report
       errors through the error logger, in order to get uniform reports.
       User defined event handlers can be added to handle application
-      specific events. (<c>add_report_handler/1,2</c>). Also, there is
+      specific events. (<c>add_report_handler/1,2</c> and
+      <c>add_report_sup_handler/1,2</c>). Also, there is
       a useful event handler in STDLIB for multi-file logging of events,
       see <c>log_mf_h(3)</c>.</p>
     <p>Warning events was introduced in Erlang/OTP R9C. To retain
@@ -272,6 +273,18 @@ ok</pre>
           The function returns <c>ok</c> if successful.</p>
         <p>The event handler must be able to handle the
           <seealso marker="#events">events</seealso> described below.</p>
+      </desc>
+    </func>
+    <func>
+      <name name="add_report_sup_handler" arity="1"/>
+      <name name="add_report_sup_handler" arity="2"/>
+      <fsummary>Add an event handler to the error logger</fsummary>
+      <desc>
+        <p>Adds a new event handler to the error logger in the same way as 
+          <c>add_report_handler/1,2</c> but will also supervise the connection
+          between the event handler and the calling process.</p>
+        <p>See <c>add_report_handler/3</c> for a description of the arguments
+          and return values.</p>
       </desc>
     </func>
     <func>

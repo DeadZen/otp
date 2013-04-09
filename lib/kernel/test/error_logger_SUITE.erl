@@ -29,8 +29,9 @@
 
 -export([all/0, suite/0,groups/0,init_per_suite/1, end_per_suite/1, 
 	 init_per_group/2,end_per_group/2, 
-	 error_report/1, info_report/1, error/1, info/1,
-	 emulator/1, tty/1, logfile/1, add/1, delete/1]).
+	 error_report/1, info_report/1, error/1, info/1, emulator/1, 
+	 error_sup_report/1, info_sup_report/1, error_sup/1, info_sup/1, 
+         emulator_sup/1, tty/1, logfile/1, add/1, delete/1]).
 
 -export([generate_error/0]).
 
@@ -42,8 +43,11 @@
 suite() -> [{ct_hooks,[ts_install_cth]}].
 
 all() -> 
-    [error_report, info_report, error, info, emulator, tty,
-     logfile, add, delete].
+    [error_report, info_report, 
+     error_sup_report, info_sup_report, 
+     error, info, emulator, 
+     error_sup, info_sup, emulator_sup, 
+     tty, logfile, add, delete].
 
 groups() -> 
     [].
@@ -66,7 +70,12 @@ end_per_group(_GroupName, Config) ->
 error_report(suite) -> [];
 error_report(doc) -> [];
 error_report(Config) when is_list(Config) ->
-    ?line error_logger:add_report_handler(?MODULE, self()),
+    case proplists:get_value(handler_type, Config, report_handler) of
+        report_handler -> 
+            ?line error_logger:add_report_handler(?MODULE, self());
+        report_sup_handler ->
+            ?line error_logger:add_report_sup_handler(?MODULE, self())
+    end,
     Rep1 = [{tag1,"data1"},{tag2,data2},{tag3,3}],
     Rep2 = [testing,"testing",{tag1,"tag1"}],
     Rep3 = "This is a string !",
@@ -106,7 +115,12 @@ error_report(Config) when is_list(Config) ->
 info_report(suite) -> [];
 info_report(doc) -> [];
 info_report(Config) when is_list(Config) ->
-    ?line error_logger:add_report_handler(?MODULE, self()),
+    case proplists:get_value(handler_type, Config, report_handler) of
+        report_handler -> 
+            ?line error_logger:add_report_handler(?MODULE, self());
+        report_sup_handler ->
+            ?line error_logger:add_report_sup_handler(?MODULE, self())
+    end,
     Rep1 = [{tag1,"data1"},{tag2,data2},{tag3,3}],
     Rep2 = [testing,"testing",{tag1,"tag1"}],
     Rep3 = "This is a string !",
@@ -146,7 +160,12 @@ info_report(Config) when is_list(Config) ->
 error(suite) -> [];
 error(doc) -> [];
 error(Config) when is_list(Config) ->
-    ?line error_logger:add_report_handler(?MODULE, self()),
+    case proplists:get_value(handler_type, Config, report_handler) of
+        report_handler -> 
+            ?line error_logger:add_report_handler(?MODULE, self());
+        report_sup_handler ->
+            ?line error_logger:add_report_sup_handler(?MODULE, self())
+    end,
     Msg1 = "This is a plain text string~n",
     Msg2 = "This is a text with arguments ~p~n",
     Arg2 = "This is the argument",
@@ -181,7 +200,12 @@ error(Config) when is_list(Config) ->
 info(suite) -> [];
 info(doc) -> [];
 info(Config) when is_list(Config) ->
-    ?line error_logger:add_report_handler(?MODULE, self()),
+    case proplists:get_value(handler_type, Config, report_handler) of
+        report_handler -> 
+            ?line error_logger:add_report_handler(?MODULE, self());
+        report_sup_handler ->
+            ?line error_logger:add_report_sup_handler(?MODULE, self())
+    end,
     Msg1 = "This is a plain text string~n",
     Msg2 = "This is a text with arguments ~p~n",
     Arg2 = "This is the argument",
@@ -209,11 +233,52 @@ info(Config) when is_list(Config) ->
 emulator(suite) -> [];
 emulator(doc) -> [];
 emulator(Config) when is_list(Config) ->
-    ?line error_logger:add_report_handler(?MODULE, self()),
+    case proplists:get_value(handler_type, Config, report_handler) of
+        report_handler -> 
+            ?line error_logger:add_report_handler(?MODULE, self());
+        report_sup_handler ->
+            ?line error_logger:add_report_sup_handler(?MODULE, self())
+    end,
     spawn(?MODULE, generate_error, []),
     reported(emulator),
     ?line my_yes = error_logger:delete_report_handler(?MODULE),
     ok.
+
+%% Repeat tests for add_report_sup_handler
+%%-----------------------------------------------------------------
+
+error_sup_report(suite) -> [];
+error_sup_report(doc) -> [];
+error_sup_report(Config) when is_list(Config) ->
+    error_report([{handler_type, report_sup_handler} | Config]).
+
+%%-----------------------------------------------------------------
+
+info_sup_report(suite) -> [];
+info_sup_report(doc) -> [];
+info_sup_report(Config) when is_list(Config) ->
+    info_report([{handler_type, report_sup_handler} | Config]).
+
+%%-----------------------------------------------------------------
+
+error_sup(suite) -> [];
+error_sup(doc) -> [];
+error_sup(Config) when is_list(Config) ->
+    error([{handler_type, report_sup_handler} | Config]).
+
+%%-----------------------------------------------------------------
+
+info_sup(suite) -> [];
+info_sup(doc) -> [];
+info_sup(Config) when is_list(Config) ->
+    info([{handler_type, report_sup_handler} | Config]).
+
+%%-----------------------------------------------------------------
+
+emulator_sup(suite) -> [];
+emulator_sup(doc) -> [];
+emulator_sup(Config) when is_list(Config) ->
+    emulator([{handler_type, report_sup_handler} | Config]).
 
 generate_error() ->
     erlang:error({badmatch,4}).
